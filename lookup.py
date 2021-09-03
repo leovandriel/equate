@@ -1,0 +1,91 @@
+#!/usr/bin/env python3 #-m cProfile -s tottime
+
+import math # https://docs.python.org/3/library/math.html
+
+target = (1 + math.sqrt(5)) / 2 # golden ratio
+
+def add(value, form, length):
+    global add_count, test_count, insert_count, min_diff
+    add_count += 1
+    key = round(value, digits)
+    if key > maximum or key < -maximum or key == 0.0:
+        return
+    test_count += 1
+    item = lookup.get(key)
+    if item is not None:
+        (value2, form2, length2) = item
+        if length2 < length:
+            return
+    lookup[key] = (value, form, length)
+    insert_count += 1
+    if min_diff > abs(value - target):
+        min_diff = abs(value - target)
+        if value == target:
+            print(f'exact match: {stringify(form)} = {value} <===============')
+        else:
+            accuracy = round(-math.log10(min_diff), 1)
+            compression = round(accuracy - math.log10(len(lookup)), 1)
+            print(f'found: {stringify(form)} = {value} accuracy: {accuracy} compression: {compression}')
+    if len(lookup) % 1000000 == 0:
+        print(f'  size: {len(lookup)}  max-drop: {round(100 - 100 * test_count / add_count)}%  dupe-drop: {round(100 - 100 * insert_count / add_count)}%  total-drop: {round(100 - 100 * len(lookup) / add_count)}%')
+
+def expand():
+    keys = list(lookup.keys())
+    index = 0
+    for key in keys:
+        (value1, form1, length1) = lookup[key]
+        add(-value1, ('-', form1), length1 + 1)
+        if value1 != 1.0 and value1 != -1.0:
+            add(1 / value1, ('1/', form1), length1 + 1)
+        if value1 > 0.0:
+            add(math.sqrt(value1), ('sqrt', form1), length1 + 1)
+            add(math.log(value1), ('log', form1), length1 + 1)
+            add(math.sin(value1), ('sin', form1), length1 + 1)
+            add(math.cos(value1), ('cos', form1), length1 + 1)
+            add(math.tan(value1), ('tan', form1), length1 + 1)
+        for key2 in keys:
+            index += 1
+            (value2, form2, length2) = lookup[key2]
+            add(value1 + value2, (form1, '+', form2), length1 + length2 + 1)
+            if value1 != 1.0 and value2 != 1.0 and value1 != -1.0 and value2 != -1.0:
+                add(value1 * value2, (form1, '*', form2), length1 + length2 + 1)
+                if value1 > 0.0:
+                    add(math.pow(value1, value2), (form1, '^', form2), length1 + length2 + 1)
+            if index % 1000000 == 0:
+                print(f'  progress: {round(100 * index / len(keys) / len(keys), 3)}% ({len(lookup)})')
+
+def stringify(tup):
+    if type(tup) is tuple:
+        return '(' + ' '.join(tuple(stringify(x) for x in tup)) + ')'
+    return str(tup)
+
+def show():
+    print(f'{len(lookup)} items:')
+    sort = sorted(lookup.values(), key=lambda item: abs(item[0] - target))
+    for (value, form, length) in sort:
+        accuracy = round(-math.log10(abs(value - target)), 1) if value != target else 'exact!'
+        print(f'  {stringify(form)} = {value} ({accuracy})')
+
+if __name__ == '__main__':
+    digits = 10
+    maximum = 10
+
+    add_count = 0
+    test_count = 0
+    insert_count = 0
+
+    lookup = {}
+    min_diff = 0.01
+
+    print(f'looking for {target}')
+
+    for i in range(-10, 10):
+    # for i in range(1, 3):
+        add(i, str(i), 1)
+    add(math.pi, 'pi', 1)
+    # add(math.e, 'e', 1)
+    show()
+
+    for iteration in range(10):
+        print(f'iteration {iteration}')
+        expand()
