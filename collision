@@ -1,0 +1,34 @@
+#!/usr/bin/env python3 #-m cProfile -s tottime
+
+#
+# Lists generated equations that have the same result. This can be used to find
+# potential optimizations in the equation generator. Reducing collisions will
+# reduce the number of equations for a given size, allowing the equation search
+# to explore further in the same amount of time.
+#
+
+import math # https://docs.python.org/3/library/math.html
+import sys
+
+from equation import generate, stringify
+from util import Collider
+
+if __name__ == '__main__':
+    limit = 100
+    max_size = 5
+    add_real = True
+    filter_collision = True
+
+    collider = Collider()
+    for size in range(1, max_size + 1):
+        found = 0
+        filter_size = size - 1 if filter_collision else 0
+        for eq, sim, _, _ in generate(size, add_real = add_real, filter_size = filter_size):
+            collision = collider.add(eq, sim[0])
+            if collision:
+                if found < limit:
+                    print(f'collision: {stringify(eq)} = {stringify(collision)}')
+                found += 1
+        if found > limit:
+            print('..')
+        print(f'size: {size} found: {found}')

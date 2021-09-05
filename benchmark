@@ -1,0 +1,24 @@
+#!/usr/bin/env python3 #-m cProfile -s tottime
+
+#
+# Benchmarks generation of all equations for given size. This can be used to
+# measure progress in optimizing the generation and limiting collisions.
+#
+
+import math # https://docs.python.org/3/library/math.html
+import sys
+import time
+
+from equation import generate, stringify
+
+if __name__ == '__main__':
+    last = 1
+    for size in range(1, 10):
+        start = time.process_time()
+        count = sum(1 for _ in generate(size))
+        seconds = (time.process_time() - start) / count
+        growth = count / last
+        last = count
+        avg = math.pow(count, 1.0 / size)
+        print(f'size: {size} growth: {round(growth, 2)}x avg: {round(avg, 2)} nanos: {round(seconds * 1e9)} count: {round(count / 1e6, 2)}M')
+
