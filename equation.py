@@ -114,7 +114,7 @@ def generate_2(eq1, sim1, ns1, rs1, eq2, sim2, ns2, rs2, config):
             else:
                 yield (('*', eq1, eq2), ('*', sim1, sim2), ns1 + ns2, rs1 + rs2)
                 yield (('/', eq1, eq2), ('/', sim1, sim2), ns1 + ns2, rs1 + rs2)
-    if config.add_real:
+    if config.add_irrationals or config.add_real:
         if op1 != '^' and op1 != 'root' and op2 != 'log':
             if isval:
                 if value1 != 1.0 and value1 != -1.0 and value2 != 1.0 and value2 != -1.0:
@@ -146,15 +146,16 @@ def generate_recurse_a(size, config):
                     yield from generate_2(eq1, sim1, ns1, rs1, eq2, sim2, ns2, rs2, config)
 
 class GenerateConfig:
-    def __init__(self, add_index, add_resi, add_real, filter_size):
+    def __init__(self, add_index, add_resi, add_irrationals, add_real, filter_size):
         self.add_index = add_index
         self.add_resi = add_resi
+        self.add_irrationals = add_irrationals
         self.add_real = add_real
         self.filter_size = filter_size
         self.collider = Collider()
 
-def generate(size, add_index = False, add_resi = False, add_real = True, filter_size = 0):
-    config = GenerateConfig(add_index, add_resi, add_real, filter_size)
+def generate(size, add_index = False, add_resi = False, add_irrationals = True, add_real = True, filter_size = 0):
+    config = GenerateConfig(add_index, add_resi, add_irrationals, add_real, filter_size)
     yield from generate_recurse_a(size, config)
 
 def evaluate_series(eq, index, resi):
@@ -182,13 +183,15 @@ def evaluate_series(eq, index, resi):
                 return None
             return math.sqrt(value)
         elif op == 'log':
-            if value < 0.0:
+            if value <= 0.0:
                 return None
             return math.log(value)
         elif op == 'sin':
             return math.sin(value)
         elif op == 'cos':
             return math.cos(value)
+        elif op == 'tan':
+            return math.tan(value)
         elif op == '!':
             if value < 0.0 or value > 100 or not value.is_integer():
                 return None
@@ -223,6 +226,10 @@ def evaluate_series(eq, index, resi):
             if value1 < 0.0 and not value2.is_integer():
                 return None
             return math.pow(value1, value2)
+        elif op == 'root':
+            if value1 > 1000 or value1 < 0.0 or value2 < 0.1:
+                return None
+            return math.pow(value1, 1 / value2)
         elif op == 'comb':
             if value1 < 0 or value2 < 0 or value1 > 100 or value2 > 100 or not value1.is_integer() or not value2.is_integer():
                 return None
@@ -240,3 +247,19 @@ def stringify(eq):
         return f'({eq[0]}{stringify(eq[1])})'
     else:
         return f'({eq[0].join([stringify(x) for x in eq[1:]])})'
+
+def rational(value):
+    if value.is_integer():
+        return (value, 1)
+    frac = value % 1.0
+    a = 0
+    b = 1
+    for i in range(0, 20000):
+        e = a / b
+        if abs(e - frac) < 1e-12:
+            return (a + math.floor(value) * b, b)
+        if e > frac:
+            b += 1 # TODO
+        else:
+            a += 1
+    return None

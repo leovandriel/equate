@@ -9,7 +9,7 @@
 
 import math
 
-from equation import generate, evaluate_series, stringify
+from equation import generate, evaluate_series, stringify, rational
 from util import cache, fetch_json
 
 def evaluate(eq, depth):
@@ -33,46 +33,57 @@ def oeis_fetch(digits):
     url = f'https://oeis.org/search?fmt=json&q={query}'
     return fetch_json(url)
 
+def flatten(eq):
+    for v in eq[1:]:
+        yield from flatten(v)
+    if isinstance(eq[0], str) and eq[0] not in {'*', '/', '+', '-', 'R', 'N'}:
+        yield eq[0]
+
 if __name__ == '__main__':
     iterations = 100
     mind_diff = 1e-12
     max_value = 1e5
     lookup_digits = 10
+    add_irrationals = True
     add_real = False
 
     lookup = set()
     for size in range(1, 10):
-        for eq, sim, ns, rs in generate(size, add_index = True, add_resi = True, add_real = add_real):
+        for eq1, sim, ns, rs in generate(size, add_index = True, add_resi = True, add_irrationals = add_irrationals, add_real = add_real):
             if ns == 0 or rs != 1:
                 continue
             value0 = evaluate(sim, iterations - 1)
             if value0 is None or value0 > max_value or value0 < -max_value or (value0 < 1 / max_value and value0 > -1 / max_value) or value0.is_integer():
-                # print(f'out-of-bounds {stringify(eq)} = {value1}')
+                # print(f'out-of-bounds {stringify(eq1)} = {value1}')
                 continue
             value1 = evaluate(sim, iterations)
             if value1 is None or abs(value0 - value1) > mind_diff:
-                # print(f'not converging {stringify(eq)} = {value1}')
+                # print(f'not converging {stringify(eq1)} = {value1}')
                 continue
             conv = round(-math.log10(abs(value0 - value1))) if value0 != value1 else 16
             digits = str(abs(value1) % 1.0)[2:2 + lookup_digits]
             if digits in lookup:
-                # print(f'already tested {stringify(eq)} = {value1}')
+                # print(f'already tested {stringify(eq1)} = {value1}')
                 continue
             lookup.add(digits)
+            fraction = rational(value1)
+            if fraction:
+                a, b = fraction
+                diff = round(-math.log10(abs(value1 - a / b))) if value1 != a / b else 16
+                # print(f'found frac: {stringify(eq1)} = {a}/{b} = {value1} conv:{conv} diff:{diff}')
+                continue
             find = cache(eq_find, value1, 'find')
-            if find is None and len(digits) == lookup_digits:
-                oeis = cache(oeis_fetch, digits, 'oeis')
-                count = oeis['count']
-                if count > 0:
-                    print(f'found oeis: {stringify(eq)} = {value1} conv:{conv} oeis:{count}')
-                    for result in oeis['results']:
-                        print(f'  {result["name"]}')
-                else:
-                    print(f'found nothing: {stringify(eq)} = {value1} conv:{conv}')
+            if find:
+                value2, eq2 = find
+                diff = round(-math.log10(abs(value1 - value2))) if value1 != value2 else 16
+                contains = ", ".join(flatten(eq2))
+                print(f'found equation: {stringify(eq1)} = {stringify(eq2)} = {value1} conv:{conv} diff:{diff} has: {contains},')
                 continue
-            if find is None:
-                # print(f'too short {stringify(eq)} = {value1}')
+            oeis = cache(oeis_fetch, digits, 'oeis')
+            count = oeis['count']
+            if count > 0:
+                print(f'found oeis: {stringify(eq1)} = {value1} conv:{conv} oeis:{count}')
+                for result in oeis['results']:
+                    print(f'- {result["name"]}')
                 continue
-            value2, eq2 = find
-            diff = round(-math.log10(abs(value1 - value2))) if value1 != value2 else 16
-            print(f'found equation: {stringify(eq)} = {stringify(eq2)} = {value1} conv:{conv} diff:{diff}')
+            print(f'found nothing: {stringify(eq1)} = {value1} conv:{conv}')

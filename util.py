@@ -42,4 +42,4 @@ def cache(op, input, name):
 
 def fetch_json(url):
     with urllib.request.urlopen(url) as response:
-    	return json.loads(response.read())
+        return json.loads(response.read())
