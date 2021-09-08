@@ -43,3 +43,32 @@ def cache(op, input, name):
 def fetch_json(url):
     with urllib.request.urlopen(url) as response:
         return json.loads(response.read())
+
+def lesser(value1, value2):
+    if isinstance(value1, tuple):
+        if isinstance(value2, tuple):
+            if len(value1) < len(value2):
+                return True
+            elif len(value2) < len(value1):
+                return False
+            else:
+                for i in range(len(value1)):
+                    if lesser(value1[i], value2[i]):
+                        return True
+                    elif lesser(value2[i], value1[i]):
+                        return False
+                return False
+        else:
+            return False
+    elif isinstance(value1, str):
+        if isinstance(value2, tuple):
+            return True
+        elif isinstance(value2, str):
+            return value1 < value2
+        else:
+            return False
+    else:
+        if isinstance(value2, tuple) or isinstance(value2, str):
+            return True
+        else:
+            return value1 < value2

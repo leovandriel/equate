@@ -42,7 +42,6 @@ def expand():
             add(math.log(value1), ('log', form1), length1 + 1)
             add(math.sin(value1), ('sin', form1), length1 + 1)
             add(math.cos(value1), ('cos', form1), length1 + 1)
-            add(math.tan(value1), ('tan', form1), length1 + 1)
         for key2 in keys:
             index += 1
             (value2, form2, length2) = lookup[key2]

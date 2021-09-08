@@ -9,11 +9,12 @@ import math # https://docs.python.org/3/library/math.html
 import sys
 
 from equation import generate, stringify
+import number
 
 if __name__ == '__main__':
     max_size = 9
     min_diff = 1e-12
-    target = float(sys.argv[1]) if len(sys.argv) > 1 else 1.618033988749895 # golden ratio
+    target = number.create(sys.argv[1]) if len(sys.argv) > 1 else number.create('1.61803398874989484820458683436563') # golden ratio
 
     total_count = 0
     last_count = 1

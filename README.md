@@ -74,7 +74,6 @@ collision: (2*3) = (1+5)
 collision: (3+5) = (2^3)
 size: 3 found: 3
 collision: cos((pi/3)) = (1/2)
-collision: tan((pi/3)) = (3^/2)
 collision: ((-1)+5) = (1+3)
 collision: ((-2)+1) = (-1)
 collision: (log(2)*2) = log((1+3))
@@ -105,7 +104,7 @@ size: 9 growth: 7.98x avg: 6.26 nanos: 1127 count: 14.72M
 
 # Series
 
-While iterate script helps find some interesting equations, like the relation between `cos(pi/5)` and `sqrt(5)`, running it on the bunch of well-known constants has not revealed any surprising equivalences. Perhaps we need to expand our horizons and look at infinite series. The series script adds support for infinite sums and products, as well as continued fractions. This is done by introducing two new primitives: `N`, the index of recursion and `R` the value of the next recursion. The equation can then be evaluated in reverse, starting with R equal to 1 or 0.
+While iterate script helps find some interesting equations, like the relation between `cos(pi/5)` and `sqrt(5)`, running it on the bunch of well-known constants has not revealed any surprising equivalences. Perhaps we need to expand our horizons and look at infinite series. The series script adds support for infinite sums and products, as well as continued fractions. This is done by introducing two new variables: `N`, the index of recursion and `R` the value of the next recursion. The equation can then be evaluated in reverse, starting with R equal to 1 or 0.
 
 For every equation that seems to converge, it runs the equation finder used in the iterate script. If it cannot find a closed form (irrational), it calls the [OEIS](https://oeis.org/) API to see if this number is known. Calls to the API are cached.
 

@@ -11,17 +11,18 @@ import math
 
 from equation import generate, evaluate, stringify, find_rational
 from util import cache, fetch_json
+import number
 
 def evaluate_series(eq, iterations, initial):
     value = initial
     for i in range(iterations):
         index = iterations - i - 1
-        value = evaluate(eq, { 'N': index, 'R': value })
+        value = evaluate(eq, { 'N': number.create(index), 'R': value })
         if value is None:
             break
     return value
 
-def eq_find(target, max_size = 8, min_diff = 1e-12):
+def eq_find(target, max_size = 7, min_diff = 1e-12):
     for size in range(1, max_size + 1):
         for eq, sim in generate(size):
             value = sim[0]
@@ -45,7 +46,7 @@ def count(eq):
 
 if __name__ == '__main__':
     iterations = 100
-    initial = 1.0
+    initial = number.create(1)
     min_diff = 1e-12
     max_value = 1e5
     lookup_digits = 10
@@ -57,7 +58,7 @@ if __name__ == '__main__':
 
     lookup = set()
     for size in range(1, 10):
-        for eq1, sim in generate(size, primitives = ['N', 'R'], operations = ops):
+        for eq1, sim in generate(size, variables = ['N', 'R'], operations = ops):
             counts = count(eq1)
             if counts.get('N') == None or counts.get('R') != 1:
                 continue
@@ -78,7 +79,7 @@ if __name__ == '__main__':
             if value1 is None or abs(value0 - value1) > min_diff:
                 # print(f'skip: {stringify(eq1)} not converging, diff {abs(value0 - value1) if value1 else "NaN"}')
                 continue
-            digits = str(abs(value1) % 1.0)[2:2 + lookup_digits]
+            digits = str(number.remainder(value1))[2:2 + lookup_digits]
             if skip_dupes:
                 if digits in lookup:
                     # print(f'skip: {stringify(eq1)} = {value1} value already tested')
@@ -93,7 +94,7 @@ if __name__ == '__main__':
                     # print(f'found frac: {stringify(eq1)} = {a}/{b} = {value1} conv:{conv} diff:{diff}')
                     continue
             if search_equation:
-                find = cache(eq_find, value1, 'find')
+                find = cache(eq_find, float(value1), 'find')
                 if find:
                     value2, eq2 = find
                     diff = round(-math.log10(abs(value1 - value2))) if value1 != value2 else 16
