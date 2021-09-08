@@ -47,127 +47,129 @@ def lesser(value1, value2):
 
 def generate_0(config):
     for res, eq in rationals.items():
-        yield (eq, (res,), 0, 0)
-    if config.add_real:
-        for res, eq in reals.items():
-            yield (eq, (res,), 0, 0)
-    if config.add_index:
-        yield (('N',), ('N',), 1, 0)
-    if config.add_resi:
-        yield (('R',), ('R',), 0, 1)
+        yield (eq, (res,))
+    for res, eq in reals.items():
+        if eq[0] in config.ops:
+            yield (eq, (res,))
+    for p in config.primitives:
+        yield ((p,), (p,))
 
-def generate_1(eq, sim, ns, rs, config):
+def generate_1(eq, sim, config):
     op = eq[0]
     value = sim[0]
     isval = isinstance(value, float)
-    if op != '-' and (op != 'log' or eq[1][0] != '/') and (op != '+' or (eq[1][0] != '-' and eq[2][0] != '-')):
+    if '-' in config.ops and op != '-' and (op != 'log' or eq[1][0] != '/') and (op != '+' or (eq[1][0] != '-' and eq[2][0] != '-')):
         if isval:
-            yield (('-', eq), (-value,), ns, rs)
+            yield (('-', eq), (-value,))
         else:
-            yield (('-', eq), ('-', sim), ns, rs)
-    if config.add_real:
-        if op != '^' and op != 'root' and (op != '*' or (eq[1][0] != 'e' and eq[2][0] != 'e')) and (op != '/' or eq[1][0] != 1):
-            if isval:
-                if value > 0.0:
-                    res = math.log(value)
-                    if not res.is_integer():
-                        yield (('log', eq), (res,), ns, rs)
-            else:
-                yield (('log', eq), ('log', sim), ns, rs)
+            yield (('-', eq), ('-', sim))
+    if 'log' in config.ops and op != '^' and op != 'root' and (op != '*' or (eq[1][0] != 'e' and eq[2][0] != 'e')) and (op != '/' or eq[1][0] != 1):
         if isval:
-            if value > 0.0 and value < math.pi / 2.0:
-                yield (('sin', eq), (math.sin(value),), ns, rs)
-                yield (('cos', eq), (math.cos(value),), ns, rs)
-                res = math.tan(value)
+            if value > 0.0:
+                res = math.log(value)
                 if not res.is_integer():
-                    yield (('tan', eq), (res,), ns, rs)
+                    yield (('log', eq), (res,))
         else:
-            yield (('sin', eq), ('sin', sim), ns, rs)
-            yield (('cos', eq), ('cos', sim), ns, rs)
-            yield (('tan', eq), ('tan', sim), ns, rs)
+            yield (('log', eq), ('log', sim))
+    if isval:
+        if value > 0.0 and value < math.pi / 2.0:
+            if 'sin' in config.ops:
+                yield (('sin', eq), (math.sin(value),))
+            if 'cos' in config.ops:
+                yield (('cos', eq), (math.cos(value),))
+            res = math.tan(value)
+            if 'tan' in config.ops and not res.is_integer():
+                yield (('tan', eq), (res,))
+    else:
+        if 'sin' in config.ops:
+            yield (('sin', eq), ('sin', sim))
+        if 'cos' in config.ops:
+            yield (('cos', eq), ('cos', sim))
+        if 'tan' in config.ops:
+            yield (('tan', eq), ('tan', sim))
 
-def generate_2(eq1, sim1, ns1, rs1, eq2, sim2, ns2, rs2, config):
+def generate_2(eq1, sim1, eq2, sim2, config):
     op1 = eq1[0]
     op2 = eq2[0]
     value1 = sim1[0]
     value2 = sim2[0]
-    isval = isinstance(value1, float) and isinstance(value2, float)
-    less = value1 < value2 if isval else lesser(op1, op2)
-    if op1 != op2 or (op1 != '-' and op1 != 'log'):
-        if less:
-            if isval:
-                if value1 != -value2:
-                    res = value1 + value2
-                    if res not in primitives:
-                        yield (('+', eq1, eq2), (res,), ns1 + ns2, rs1 + rs2)
-            else:
-                yield (('+', eq1, eq2), ('+', sim1, sim2), ns1 + ns2, rs1 + rs2)
-    if op1 != op2 or (op1 != '1/' and op1 != 'sqrt' and op1 != 'sqre'):
-        if op1 != '-' and op2 != '-' and op1 != '/' and op2 != '/':
-            if isval:
-                if value2 != 1.0 and value2 != -1.0:
-                    if value1 != 1.0 and value1 != -1.0:
-                        if less:
-                            yield (('*', eq1, eq2), (value1 * value2,), ns1 + ns2, rs1 + rs2)
-                    if value1 != value2:
-                        yield (('/', eq1, eq2), (value1 / value2,), ns1 + ns2, rs1 + rs2)
-            else:
-                yield (('*', eq1, eq2), ('*', sim1, sim2), ns1 + ns2, rs1 + rs2)
-                yield (('/', eq1, eq2), ('/', sim1, sim2), ns1 + ns2, rs1 + rs2)
-    if config.add_irrationals or config.add_real:
-        if op1 != '^' and op1 != 'root' and op2 != 'log':
-            if isval:
-                if value1 != 1.0 and value1 != -1.0 and value2 != 1.0 and value2 != -1.0:
-                    if value1 > 0.001 and value1 < 1000.0 and value2 > 0.0 and value2 < 10.0:
-                        if value2.is_integer():
-                            yield (('root', eq1, eq2), (math.pow(value1, 1.0 / value2),), ns1 + ns2, rs1 + rs2)
-                        if not (1.0 / value2).is_integer():
-                            yield (('^', eq1, eq2), (math.pow(value1, value2),), ns1 + ns2, rs1 + rs2)
-            else:
-                yield (('root', eq1, eq2), ('root', sim1, sim2), ns1 + ns2, rs1 + rs2)
-                yield (('^', eq1, eq2), ('^', sim1, sim2), ns1 + ns2, rs1 + rs2)
+    isval1 = isinstance(value1, float)
+    isval2 = isinstance(value2, float)
+    less = value1 < value2 if isval1 and isval2 else lesser(op1, op2)
+    if '+' in config.ops and (op1 != op2 or (op1 != '-' and op1 != 'log')) and less:
+        if isval1 and isval2:
+            if value1 != -value2:
+                res = value1 + value2
+                if res not in primitives:
+                    yield (('+', eq1, eq2), (res,))
+        else:
+            yield (('+', eq1, eq2), ('+', sim1, sim2))
+    if op1 != '-' and op2 != '-' and op1 != '/' and op2 != '/':
+        if op1 != op2 or (op1 != '1/' and op1 != 'sqrt' and op1 != 'sqre'):
+            if value2 != 1.0 and value2 != -1.0:
+                if '*' in config.ops and (not isval1 or (value1 != 1.0 and value1 != -1.0)) and less:
+                    if isval1 and isval2:
+                        yield (('*', eq1, eq2), (value1 * value2,))
+                    else:
+                        yield (('*', eq1, eq2), ('*', sim1, sim2))
+                if '/' in config.ops and (not isval1 or not isval2 or value1 != value2):
+                    if isval1 and isval2:
+                        yield (('/', eq1, eq2), (value1 / value2,))
+                    else:
+                        yield (('/', eq1, eq2), ('/', sim1, sim2))
+    if op1 != '^' and op1 != 'root' and op2 != 'log':
+        if value1 != 1.0 and value1 != -1.0 and value2 != 1.0 and value2 != -1.0:
+            if (not isval1 or (value1 > 0.001 and value1 < 1000.0)) and (not isval2 or (value2 > 0.0 and value2 < 10.0)):
+                if 'root' in config.ops and (not isval2 or value2.is_integer()):
+                    if isval1 and isval2:
+                        yield (('root', eq1, eq2), (math.pow(value1, 1.0 / value2),))
+                    else:
+                        yield (('root', eq1, eq2), ('root', sim1, sim2))
+                if '^' in config.ops and (not isval2 or not (1.0 / value2).is_integer()):
+                    if isval1 and isval2:
+                        yield (('^', eq1, eq2), (math.pow(value1, value2),))
+                    else:
+                        yield (('^', eq1, eq2), ('^', sim1, sim2))
 
 def generate_recurse_b(size, config):
     use_filter = size > 2 and size <= config.filter_size
-    for eq, sim, ns, rs in generate_recurse_a(size, config):
+    for eq, sim in generate_recurse_a(size, config):
         if use_filter and config.collider.add(eq, sim[0]):
             continue
-        yield (eq, sim, ns, rs)
+        yield (eq, sim)
 
 def generate_recurse_a(size, config):
     if size == 1:
         yield from generate_0(config)
     elif size > 1:
-        for eq, sim, ns, rs in generate_recurse_b(size - 1, config):
-            yield from generate_1(eq, sim, ns, rs, config)
+        for eq, sim in generate_recurse_b(size - 1, config):
+            yield from generate_1(eq, sim, config)
         for size1 in range(1, size - 1):
-            for eq1, sim1, ns1, rs1 in generate_recurse_b(size1, config):
-                for eq2, sim2, ns2, rs2 in generate_recurse_b(size - size1 - 1, config):
-                    yield from generate_2(eq1, sim1, ns1, rs1, eq2, sim2, ns2, rs2, config)
+            for eq1, sim1 in generate_recurse_b(size1, config):
+                for eq2, sim2 in generate_recurse_b(size - size1 - 1, config):
+                    yield from generate_2(eq1, sim1, eq2, sim2, config)
 
 class GenerateConfig:
-    def __init__(self, add_index, add_resi, add_irrationals, add_real, filter_size):
-        self.add_index = add_index
-        self.add_resi = add_resi
-        self.add_irrationals = add_irrationals
-        self.add_real = add_real
+    def __init__(self, primitives, ops, filter_size):
+        self.primitives = primitives
+        self.ops = ops if ops else { '+', '-', '*', '/', '^', 'root', 'log', 'sin', 'cos', 'tan', 'pi', 'e' }
         self.filter_size = filter_size
         self.collider = Collider()
 
-def generate(size, add_index = False, add_resi = False, add_irrationals = True, add_real = True, filter_size = 0):
-    config = GenerateConfig(add_index, add_resi, add_irrationals, add_real, filter_size)
+def generate(size, primitives = [], operations = None, filter_size = 0):
+
+    config = GenerateConfig(primitives, operations, filter_size)
     yield from generate_recurse_a(size, config)
 
-def evaluate_series(eq, index, resi):
+def evaluate(eq, primitives):
     op = eq[0]
     if len(eq) == 1:
-        if op == 'N':
-            return float(index)
-        elif op == 'R':
-            return resi
-        return op
+        if op in primitives:
+            return float(primitives[op])
+        if isinstance(op, float):
+            return op
     elif len(eq) == 2:
-        value = evaluate_series(eq[1], index, resi)
+        value = evaluate(eq[1], primitives)
         if value is None:
             return None
         if op == '-':
@@ -201,10 +203,10 @@ def evaluate_series(eq, index, resi):
                 return None
             return 1.0 if value % 2 == 0 else -1.0
     else:
-        value1 = evaluate_series(eq[1], index, resi)
+        value1 = evaluate(eq[1], primitives)
         if value1 is None:
             return None
-        value2 = evaluate_series(eq[2], index, resi)
+        value2 = evaluate(eq[2], primitives)
         if value2 is None:
             return None
         elif op == '+':
@@ -248,7 +250,7 @@ def stringify(eq):
     else:
         return f'({eq[0].join([stringify(x) for x in eq[1:]])})'
 
-def rational(value):
+def find_rational(value):
     if value.is_integer():
         return (value, 1)
     frac = value % 1.0
