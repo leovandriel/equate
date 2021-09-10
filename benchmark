@@ -16,9 +16,19 @@ if __name__ == '__main__':
     for size in range(1, 10):
         start = time.process_time()
         count = sum(1 for _ in generate(size))
-        seconds = (time.process_time() - start) / count
+        span = time.process_time() - start
+        seconds = span / count
         growth = count / last
         last = count
         avg = math.pow(count, 1.0 / size)
-        print(f'size: {size} growth: {round(growth, 2)}x avg: {round(avg, 2)} nanos: {round(seconds * 1e9)} count: {round(count / 1e6, 2)}M')
+        print(f'size: {size} growth: {growth:.2f}x avg: {avg:.2f} nanos: {(seconds * 1e9):.0f} count: {(count / 1e6):.2f}M secs: {span:.2f}')
 
+# size: 1 growth: 6.00x avg: 6.00 nanos: 2333 count: 0.00M secs: 0.00
+# size: 2 growth: 2.17x avg: 3.61 nanos: 1923 count: 0.00M secs: 0.00
+# size: 3 growth: 9.23x avg: 4.93 nanos: 1308 count: 0.00M secs: 0.00
+# size: 4 growth: 4.76x avg: 4.89 nanos: 1287 count: 0.00M secs: 0.00
+# size: 5 growth: 8.33x avg: 5.44 nanos: 997 count: 0.00M secs: 0.00
+# size: 6 growth: 6.56x avg: 5.61 nanos: 1022 count: 0.03M secs: 0.03
+# size: 7 growth: 7.95x avg: 5.90 nanos: 1157 count: 0.25M secs: 0.29
+# size: 8 growth: 7.44x avg: 6.07 nanos: 1103 count: 1.85M secs: 2.03
+# size: 9 growth: 7.98x avg: 6.26 nanos: 1083 count: 14.72M secs: 15.95
