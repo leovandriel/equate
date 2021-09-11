@@ -6,24 +6,44 @@
 # reduce the number of equations for a given size, allowing the equation search
 # to explore further in the same amount of time.
 #
+# Use in conjunction with the coverage script.
+#
+# Consider setting custom precision (e.g. 20) in number.py to get better results.
+#
 
 import math # https://docs.python.org/3/library/math.html
 import sys
 
-from equation import generate, stringify
-from util import Collider
+from equation import generate_0, generate_1, generate_2, default_ops, stringify
+from util import lookup_add
+
+def generate_collision(size, lookup, digits):
+    if size == 1:
+        yield from generate_0(default_ops, [])
+    else:
+        for eq, sim in generate_collision(size - 1, lookup, digits):
+            if lookup_add(lookup, eq, sim[0], digits):
+                continue
+            yield from generate_1(eq, sim, default_ops)
+        for size1 in range(1, size - 1):
+            for eq1, sim1 in generate_collision(size1, lookup, digits):
+                if lookup_add(lookup, eq1, sim1[0], digits):
+                    continue
+                for eq2, sim2 in generate_collision(size - size1 - 1, lookup, digits):
+                    if lookup_add(lookup, eq2, sim2[0], digits):
+                        continue
+                    yield from generate_2(eq1, sim1, eq2, sim2, default_ops)
 
 if __name__ == '__main__':
     limit = 100
     max_size = 5
-    filter_collision = True
+    digits = 12
 
-    collider = Collider()
+    lookup = {}
     for size in range(1, max_size + 1):
         found = 0
-        filter_size = size - 1 if filter_collision else 0
-        for eq, sim in generate(size, filter_size = filter_size):
-            collision = collider.add(eq, sim[0])
+        for eq, sim in generate_collision(size, {}, digits):
+            collision = lookup_add(lookup, eq, sim[0], digits)
             if collision:
                 if found < limit:
                     print(f'collision: {stringify(eq)} = {stringify(collision)}')

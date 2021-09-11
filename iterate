@@ -25,10 +25,10 @@ if __name__ == '__main__':
             value = sim[0]
             current_count += 1
             if abs(value - target) < min_diff:
-                diff = round(-math.log10(abs(value - target)), 1) if value != target else 16
-                print(f'\r{stringify(eq)} = {value} (diff: {diff})')
+                digits = round(-math.log10(abs(value - target)), 1) if value != target else 16
+                print(f'\r{stringify(eq)} = {value} (digits: {digits})')
             if current_count % 1000000 == 0:
-                print(f'\riterations: {round((total_count + current_count) / 1e6)}M size: {size} progress: {round(100 * current_count / est_count, 2)}% ', end='', file=sys.stderr)
+                print(f'\riterations: {(total_count + current_count) / 1e6:.0f}M size: {size} progress: {100 * current_count / est_count:.2f}% ', end='', file=sys.stderr)
         total_count += current_count
         est_count = current_count * current_count / last_count
         last_count = current_count

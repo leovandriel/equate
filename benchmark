@@ -23,12 +23,12 @@ if __name__ == '__main__':
         avg = math.pow(count, 1.0 / size)
         print(f'size: {size} growth: {growth:.2f}x avg: {avg:.2f} nanos: {(seconds * 1e9):.0f} count: {(count / 1e6):.2f}M secs: {span:.2f}')
 
-# size: 1 growth: 6.00x avg: 6.00 nanos: 2667 count: 0.00M secs: 0.00
-# size: 2 growth: 2.00x avg: 3.46 nanos: 2333 count: 0.00M secs: 0.00
-# size: 3 growth: 9.17x avg: 4.79 nanos: 1600 count: 0.00M secs: 0.00
-# size: 4 growth: 4.15x avg: 4.62 nanos: 1643 count: 0.00M secs: 0.00
-# size: 5 growth: 8.43x avg: 5.21 nanos: 1291 count: 0.00M secs: 0.00
-# size: 6 growth: 5.87x avg: 5.32 nanos: 1422 count: 0.02M secs: 0.03
-# size: 7 growth: 7.81x avg: 5.62 nanos: 1445 count: 0.18M secs: 0.26
-# size: 8 growth: 6.84x avg: 5.76 nanos: 1497 count: 1.21M secs: 1.81
-# size: 9 growth: 7.68x avg: 5.95 nanos: 1469 count: 9.28M secs: 13.64
+# size: 1 growth: 6.00x avg: 6.00 nanos: 1500 count: 0.00M secs: 0.00
+# size: 2 growth: 2.00x avg: 3.46 nanos: 1917 count: 0.00M secs: 0.00
+# size: 3 growth: 9.17x avg: 4.79 nanos: 1482 count: 0.00M secs: 0.00
+# size: 4 growth: 4.15x avg: 4.62 nanos: 1617 count: 0.00M secs: 0.00
+# size: 5 growth: 8.20x avg: 5.19 nanos: 1234 count: 0.00M secs: 0.00
+# size: 6 growth: 5.94x avg: 5.30 nanos: 1298 count: 0.02M secs: 0.03
+# size: 7 growth: 7.72x avg: 5.60 nanos: 1367 count: 0.17M secs: 0.23
+# size: 8 growth: 6.87x avg: 5.74 nanos: 1368 count: 1.18M secs: 1.62
+# size: 9 growth: 7.62x avg: 5.92 nanos: 1375 count: 9.00M secs: 12.37

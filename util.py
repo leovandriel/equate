@@ -1,30 +1,24 @@
+import decimal
 import hashlib
 import json
 import math
 import os.path
 import urllib.request
 
-def trim(value, digits):
-    if value == 0.0:
-        return value
-    precision = digits - math.ceil(math.log10(abs(value)))
-    if precision < 0:
-        return value
-    return float(f'{{:.{precision}f}}'.format(value))
+def lookup_add(lookup, eq, value, digits):
+    key = round(value, digits - math.ceil(math.log10(abs(value)))) if value != 0 else value
+    if key in lookup:
+        if lookup[key] != eq:
+            return lookup[key]
+    else:
+        lookup[key] = eq
+    return None
 
-class Collider:
-    def __init__(self, precision = 13):
-        self.precision = precision
-        self.lookup = {}
-
-    def add(self, eq, value):
-        key = trim(value, self.precision)
-        if key in self.lookup:
-            if self.lookup[key] != eq:
-                return self.lookup[key]
-        else:
-            self.lookup[key] = eq
-        return None
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
+            return str(o)
+        return super(DecimalEncoder, self).default(o)
 
 def cache(op, input, name):
     key = hashlib.md5(str(input).encode('utf-8')).hexdigest()
@@ -34,10 +28,10 @@ def cache(op, input, name):
             data = json.loads(file.read())
             return data['output']
     else:
-        output = op(input)
+        output = op(*input)
         with open(path, 'w') as file:
             data = { 'input': input, 'output': output }
-            file.write(json.dumps(data))
+            file.write(json.dumps(data, cls=DecimalEncoder))
         return output
 
 def fetch_json(url):
@@ -72,3 +66,23 @@ def lesser(value1, value2):
             return True
         else:
             return value1 < value2
+
+def find_rational(value):
+    frac = value
+    coef = []
+    prod = 1
+    while prod < 1e10:
+        integer = int(frac)
+        coef.append(integer)
+        if abs(frac - integer) <1e-5:
+            a = 1
+            b = 0
+            for x in reversed(coef):
+                v = a
+                a = a * x + b
+                b = v
+            return (a, b)
+        frac = 1 / (frac - integer)
+        if integer != 0:
+            prod *= abs(integer)
+    return None

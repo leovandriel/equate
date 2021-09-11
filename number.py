@@ -28,7 +28,7 @@ if precision:
         return value.quantize(Decimal(1), rounding=ROUND_DOWN)
 
     def remainder(value):
-        value.copy_abs() % 1
+        return value.copy_abs() % 1
 
     def is_integer(value):
         return value.to_integral_value() == value
@@ -117,7 +117,7 @@ else:
         return math.floor(value)
 
     def remainder(value):
-        abs(value) % 1.0
+        return abs(value) % 1.0
 
     def is_integer(value):
         return value.is_integer()
@@ -130,54 +130,3 @@ else:
 
     def is_nan(value):
         return math.isnan(value)
-
-    def approx_pi():
-        getcontext().prec += 2
-        s, last, n, na, d, da, t = 3, 0, 1, 0, 0, 24, Decimal(3)
-        while s != last:
-            last = s
-            n, na = n + na, na + 8
-            d, da = d + da, da + 32
-            t = (t * n) / d
-            s += t
-        getcontext().prec -= 2
-        return +s
-
-    def approx_e():
-        getcontext().prec += 2
-        s, last, i, fact, num = 1, 0, 0, 1, Decimal(1)
-        while s != last:
-            last = s
-            i += 1
-            fact *= i
-            s += num / fact
-        getcontext().prec -= 2
-        return +s
-
-    def approx_sin(value):
-        sq = value * value
-        getcontext().prec += 2
-        s, last, i, fact, num, sign = value, 0, 1, 1, value, 1
-        while s != last:
-            last = s
-            i += 2
-            fact *= i * (i - 1)
-            num *= sq
-            sign *= -1
-            s += num / fact * sign
-        getcontext().prec -= 2
-        return +s
-
-    def approx_cos(value):
-        sq = value * value
-        getcontext().prec += 2
-        s, last, i, fact, num, sign = 1, 0, 0, 1, 1, 1
-        while s != last:
-            last = s
-            i += 2
-            fact *= i * (i - 1)
-            num *= sq
-            sign *= -1
-            s += num / fact * sign
-        getcontext().prec -= 2
-        return +s

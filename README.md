@@ -50,9 +50,9 @@ The next approach is to iterate through all possible equations, breadth first. T
 
 ```
 $ ./iterate
-(cos((pi/5))*2) = 1.618033988749895 (diff: 16)
-((1+(5^/2))/2) = 1.618033988749895 (diff: 16)
-((2+(5^/2))^/3) = 1.618033988749895 (diff: 16)
+(cos((pi/5))*2) = 1.618033988749895 (digits: 16)
+((1+(5^/2))/2) = 1.618033988749895 (digits: 16)
+((2+(5^/2))^/3) = 1.618033988749895 (digits: 16)
 ```
 
 This approach also has fewest parameters, leaving just the constants and operands to be implemented. Most operands have additional constraints that weed out trivial equivalences. Additional constraints can be added to remove more complex multi-level equivalences.
@@ -122,8 +122,8 @@ found oeis: (-(1/(N+R))) = 0.38821076556779577 conv:16 oeis:1
 - Decimal expansion of J_0(2)/J_1(2) = 1 - 1/(2 - 1/(3 - 1/(4 - ...))).
 found oeis: (-((1/R)+N)) = 2.5759203213682222 conv:16 oeis:1
 - Decimal expansion of BesselJ(1,2)/BesselJ(0,2).
-found equation: (1+(R/(1+N))) = e = 2.718281828459045 conv:16 diff:16 has: e,
-found equation: (1+(R/(3+N))) = (((-2)+e)*2) = 1.4365636569180904 conv:16 diff:16 has: e,
+found equation: (1+(R/(1+N))) = e = 2.718281828459045 conv:16 digits:16 has: e,
+found equation: (1+(R/(3+N))) = (((-2)+e)*2) = 1.4365636569180904 conv:16 digits:16 has: e,
 ```
 
 It is able to find a continued fraction for e within second: `(1+(R/(1+N)))`. Pi might be a lot harder to find.
