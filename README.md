@@ -85,6 +85,15 @@ collision: ((-5)+3) = (-2)
 size: 4 found: 10
 ```
 
+# Coverage
+
+When optimizing the implementation of the equation iterator there is a risk of over-constraining, which prevents certain unique equations from being generated. The coverage script compares generated equations with a list of equations that is generated separately and without conditions. It then lists all equations that are potentially missing from the iterator. This basically complements the function of the collision script.
+
+```
+$ ./coverage
+basic missing: 0/24705, generate missing: 0/24609
+```
+
 # Benchmark
 
 The benchmark script helps with keeping an eye on performance of the equation iterator. It lists growth of the equation count per size and time per iteration. Additionally every script can be profiled by uncommenting `#-m cProfile -s tottime` in the header.

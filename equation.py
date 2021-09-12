@@ -79,7 +79,7 @@ def generate_2(eq1, sim1, eq2, sim2, ops):
                             yield (('/', eq1, eq2), (value1 / value2,))
                         else:
                             yield (('/', eq1, eq2), ('/', sim1, sim2))
-    if op1 != '^' and op1 != '^/' and op2 != 'log':
+    if op1 != '^' and op1 != '^/':
         if value1 != one and value1 != min_one and value2 != one and value2 != min_one:
             if (not isval1 or (value1 > 1e-3 and value1 < 1e3)) and (not isval2 or (not number.is_signed(value2) and value2 <= 3e1)):
                 if (not isval2 or number.is_integer(value2)) and '^/' in ops:

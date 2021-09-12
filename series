@@ -63,7 +63,7 @@ if __name__ == '__main__':
             counts = count(eq1)
             if counts.get('N') == None or counts.get('R') != 1:
                 continue
-            is_series = (eq1[0] == '+' or eq1[0] == '*' or eq1[0] == '/') and eq1[1][0] == 'R'
+            is_series = 'is_series' if (eq1[0] == '+' or eq1[0] == '*' or eq1[0] == '/') and eq1[1][0] == 'R' else ''
             value0 = evaluate_series(sim, iterations - 1, initial)
             if value0 is None:
                 # print(f'skip: {stringify(eq1)} = NaN')
@@ -84,7 +84,7 @@ if __name__ == '__main__':
             if abs(value0 - value1) > min_diff:
                 digits = -math.log10(abs(value0 - value1))
                 if digits > 6:
-                    print(f'skip: {stringify(eq1)} not converging, digits: {digits:.1f} series: {is_series}')
+                    print(f'skip: {stringify(eq1)} not converging, digits: {digits:.1f} {is_series}')
                 continue
             key = str(number.remainder(value1))[2:2 + lookup_digits]
             if skip_dupes and len(key) == lookup_digits:
@@ -98,8 +98,8 @@ if __name__ == '__main__':
                 if fraction:
                     a, b = fraction
                     digits = round(-math.log10(abs(value1 - a / b))) if value1 != a / b else 16
-                    if is_series:
-                        print(f'found frac: {stringify(eq1)} = {a}/{b} = {value1} conv:{conv} digits:{digits} series: {is_series}')
+                    if is_series and not number.is_integer(value1):
+                        print(f'found frac: {stringify(eq1)} = {a}/{b} = {value1} conv:{conv} digits:{digits} {is_series}')
                     continue
             if search_equation:
                 find = cache(eq_find, (value1, find_max_size), 'find')
@@ -107,13 +107,13 @@ if __name__ == '__main__':
                     value2, eq2 = find
                     digits = round(-math.log10(abs(value1 - value2))) if value1 != value2 else 16
                     contains = ', '.join(sorted([v for v in count(eq2) if not isinstance(v, int) and v not in {'*', '/', '+', '-', 'R', 'N'}]))
-                    print(f'found equation: {stringify(eq1)} = {stringify(eq2)} = {value1} conv:{conv} digits:{digits} has: {contains}, series: {is_series}')
+                    print(f'found equation: {stringify(eq1)} = {stringify(eq2)} = {value1} conv:{conv} digits:{digits} has: {contains}, {is_series}')
                     continue
             if search_oeis and len(key) == lookup_digits:
                 oeis = cache(oeis_fetch, (key, ), 'oeis')
                 oeis_count = oeis['count']
                 if oeis_count > 0:
-                    print(f'found oeis: {stringify(eq1)} = {value1} conv:{conv} oeis:{oeis_count} series: {is_series}')
+                    print(f'found oeis: {stringify(eq1)} = {value1} conv:{conv} oeis:{oeis_count} {is_series}')
                     for result in oeis['results']:
                         oeis_digits = result['data'].replace(',', '')
                         offset = int(result['offset'].split(',')[0])
@@ -122,4 +122,4 @@ if __name__ == '__main__':
                         print(f'- {result["name"]} digits: {digits}')
                     continue
             if is_series:
-                print(f'found nothing: {stringify(eq1)} = {value1} conv:{conv} series: {is_series}')
+                print(f'found nothing: {stringify(eq1)} = {value1} conv:{conv} {is_series}')

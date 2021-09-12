@@ -1,0 +1,83 @@
+#!/usr/bin/env python3 #-m cProfile -s tottime
+
+#
+# While removing equation duplicates (collision), there is a chance that we
+# remove too many and loose certain unique equations from our iteraterator.
+# This script will store and track and equation list by value that will allow
+# us to find these missing equations as we optimize the iterator.
+#
+# Use in conjunction with the collision script.
+#
+
+import math # https://docs.python.org/3/library/math.html
+import sys
+
+from equation import generate, stringify, rationals, reals
+from util import lookup_add
+import number
+
+def generate_basic(size, lookup, digits):
+    if size == 1:
+        for prim, value in rationals.items():
+            yield ((prim,), value)
+        for prim, value in reals.items():
+            yield ((prim,), value)
+    else:
+        for eq, value in generate_basic(size - 1, lookup, digits):
+            if lookup_add(lookup, eq, value, digits):
+                continue
+            yield (('-', eq), -value)
+            if value > 0:
+                yield (('log', eq), number.log(value))
+                if value < reals['pi'] / 2:
+                    yield (('sin', eq), number.sin(value))
+                    yield (('cos', eq), number.cos(value))
+        for size1 in range(1, size - 1):
+            for eq1, value1 in generate_basic(size1, lookup, digits):
+                if lookup_add(lookup, eq1, value1, digits):
+                    continue
+                for eq2, value2 in generate_basic(size - size1 - 1, lookup, digits):
+                    if lookup_add(lookup, eq2, value2, digits):
+                        continue
+                    yield (('+', eq1, eq2), value1 + value2)
+                    yield (('*', eq1, eq2), value1 * value2)
+                    yield (('/', eq1, eq2), value1 / value2)
+                    if value2 > 0 and value2 <= 3e1:
+                        if value1 > 1e-3 and value1 < 1e3:
+                            yield (('^', eq1, eq2), value1 ** value2)
+                        if value1 > 0 and value2.is_integer():
+                            yield (('^/', eq1, eq2), value1 ** (1 / value2))
+
+if __name__ == '__main__':
+    max_size = 6
+    lookahead_size = 2
+    digits = 12
+
+    lookup1 = { 0.0: '0' }
+    for size in range(1, max_size + 1):
+        for eq, value in generate_basic(size, lookup1, digits):
+            lookup_add(lookup1, eq, value, digits)
+
+    lookup2 = { 0.0: '0' }
+    for size in range(1, max_size + 1):
+        for eq, sim in generate(size):
+            lookup_add(lookup2, eq, sim[0], digits)
+
+    lookup3 = { 0.0: '0' }
+    for size in range(1, max_size + 1 + lookahead_size):
+        for eq, sim in generate(size):
+            lookup_add(lookup3, eq, sim[0], digits)
+
+    missing1 = 0
+    for key in lookup1.keys():
+        if key not in lookup3:
+            missing1 += 1
+            print(f'missing: generate {stringify(lookup1[key])} = {key}')
+
+    missing2 = 0
+    for key in lookup2.keys():
+        if key not in lookup1:
+            missing2 += 1
+            print(f'missing: basic {stringify(lookup2[key])} = {key}')
+
+    print(f'basic missing: {missing2}/{len(lookup1)}, generate missing: {missing1}/{len(lookup2)}')
