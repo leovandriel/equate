@@ -4,16 +4,15 @@ from util import lookup_add, lesser
 import number
 
 default_ops = { '+', '-', '*', '/', '^', '^/', 'log', 'sin', 'cos', 'pi', 'e' }
-rationals = { p: number.create(p) for p in [1, 2, 3, 5] }
 reals = { 'pi': number.pi(), 'e': number.e() }
-primitives = set(rationals.values()) | set(reals.values())
+primitives = set(reals.values())
 one = number.create(1)
 two = number.create(2)
 min_one = number.create(-1)
 
 def generate_0(ops, vars):
-    for prim, res in rationals.items():
-        yield ((prim,), (res,))
+    for value in range(1, 6):
+        yield ((value,), (number.create(value),))
     for prim, res in reals.items():
         if prim in ops:
             yield ((prim,), (res,))
@@ -65,7 +64,7 @@ def generate_2(eq1, sim1, eq2, sim2, ops):
         if isval1 and isval2:
             if value1 != -value2:
                 res = value1 + value2
-                if res not in primitives:
+                if not number.is_integer(res) and res not in primitives:
                     yield (('+', eq1, eq2), (res,))
         else:
             yield (('+', eq1, eq2), ('+', sim1, sim2))
@@ -79,13 +78,17 @@ def generate_2(eq1, sim1, eq2, sim2, ops):
             and (op2 != '*' or lesser(eq1, eq2[1]))
             and '*' in ops):
             if isval1 and isval2:
-                yield (('*', eq1, eq2), (value1 * value2,))
+                res = value1 * value2
+                if not number.is_integer(res) and res not in primitives:
+                    yield (('*', eq1, eq2), (res,))
             else:
                 yield (('*', eq1, eq2), ('*', sim1, sim2))
         if ((not isval1 or not isval2 or value1 != value2)
             and '/' in ops):
             if isval1 and isval2:
-                yield (('/', eq1, eq2), (value1 / value2,))
+                res = value1 / value2
+                if not number.is_integer(res) and res not in primitives:
+                    yield (('/', eq1, eq2), (res,))
             else:
                 yield (('/', eq1, eq2), ('/', sim1, sim2))
     if (op1 != '^' and op1 != '^/'

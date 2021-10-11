@@ -42,12 +42,14 @@ if __name__ == '__main__':
     lookup = {}
     for size in range(1, max_size + 1):
         found = 0
+        total = 0
         for eq, sim in generate_collision(size, {}, digits):
             collision = lookup_add(lookup, eq, sim[0], digits)
             if collision:
                 if found < limit:
                     print(f'collision: {stringify(eq)} = {stringify(collision)}')
                 found += 1
+            total += 1
         if found > limit:
             print('..')
-        print(f'size: {size} found: {found}')
+        print(f'size: {size} found: {found}/{total}')

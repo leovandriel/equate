@@ -13,8 +13,9 @@ import number
 
 if __name__ == '__main__':
     max_size = 9
-    min_diff = 1e-12
+
     target = number.create(sys.argv[1]) if len(sys.argv) > 1 else number.create('1.61803398874989484820458683436563') # golden ratio
+    min_diff = (10 ** -number.create(sys.argv[2])) if len(sys.argv) > 2 else number.create(1e-12)
 
     total_count = 0
     last_count = 1

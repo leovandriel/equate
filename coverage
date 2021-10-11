@@ -12,16 +12,19 @@
 import math # https://docs.python.org/3/library/math.html
 import sys
 
-from equation import generate, stringify, rationals, reals
+from equation import generate, stringify
 from util import lookup_add
 import number
 
+pi = number.pi()
+e = number.e()
+
 def generate_basic(size, lookup, digits):
     if size == 1:
-        for prim, value in rationals.items():
-            yield ((prim,), value)
-        for prim, value in reals.items():
-            yield ((prim,), value)
+        for value in range(1, 6):
+            yield ((value,), number.create(value))
+        yield (('pi',), pi)
+        yield (('e',), e)
     else:
         for eq, value in generate_basic(size - 1, lookup, digits):
             if lookup_add(lookup, eq, value, digits):
@@ -29,7 +32,7 @@ def generate_basic(size, lookup, digits):
             yield (('-', eq), -value)
             if value > 0:
                 yield (('log', eq), number.log(value))
-                if value < reals['pi'] / 2:
+                if value < pi / 2:
                     yield (('sin', eq), number.sin(value))
                     yield (('cos', eq), number.cos(value))
         for size1 in range(1, size - 1):
