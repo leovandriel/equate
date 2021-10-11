@@ -25,10 +25,10 @@ if __name__ == '__main__':
 
 # size: 1 growth: 6.00x avg: 6.00 nanos: 1667 count: 0.00M secs: 0.00
 # size: 2 growth: 2.00x avg: 3.46 nanos: 2083 count: 0.00M secs: 0.00
-# size: 3 growth: 9.17x avg: 4.79 nanos: 1109 count: 0.00M secs: 0.00
-# size: 4 growth: 4.34x avg: 4.67 nanos: 1239 count: 0.00M secs: 0.00
-# size: 5 growth: 8.14x avg: 5.22 nanos: 1198 count: 0.00M secs: 0.00
-# size: 6 growth: 6.05x avg: 5.35 nanos: 1332 count: 0.02M secs: 0.03
-# size: 7 growth: 7.77x avg: 5.64 nanos: 1281 count: 0.18M secs: 0.23
-# size: 8 growth: 6.98x avg: 5.80 nanos: 1309 count: 1.27M secs: 1.67
-# size: 9 growth: 7.68x avg: 5.98 nanos: 1306 count: 9.78M secs: 12.78
+# size: 3 growth: 9.17x avg: 4.79 nanos: 1582 count: 0.00M secs: 0.00
+# size: 4 growth: 4.34x avg: 4.67 nanos: 1488 count: 0.00M secs: 0.00
+# size: 5 growth: 7.90x avg: 5.19 nanos: 1534 count: 0.00M secs: 0.01
+# size: 6 growth: 6.04x avg: 5.32 nanos: 1593 count: 0.02M secs: 0.04
+# size: 7 growth: 7.58x avg: 5.60 nanos: 1699 count: 0.17M secs: 0.29
+# size: 8 growth: 6.93x avg: 5.75 nanos: 1699 count: 1.20M secs: 2.03
+# size: 9 growth: 7.54x avg: 5.93 nanos: 1754 count: 9.02M secs: 15.82
